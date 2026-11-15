@@ -2,6 +2,8 @@
 
 Ambiente: Debian 13, x86-64, GCC 14.2, CMake 4.4.5, JUCE 8.0.6 (`51a8a6d7aeae7326956d747737ccf1575e61e209`).
 
+Build adicional de distribuição: Windows Server 2022 / Visual Studio 2022 x64, GitHub Actions. [Execução concluída com sucesso](https://github.com/aulamix001/CLA-VOCALS/actions/runs/43753344140), commit `009dab810e26c5773851d48927352a9bca45994f`.
+
 | Verificação | Resultado |
 | --- | --- |
 | Build Release Linux de VST3 e Standalone | Passou |
@@ -12,8 +14,12 @@ Ambiente: Debian 13, x86-64, GCC 14.2, CMake 4.4.5, JUCE 8.0.6 (`51a8a6d7aeae732
 | Editor JUCE | Construído e renderizado para PNG em modo headless; inspeção visual realizada |
 | Imagem de referência | SHA-256 idêntico ao original salvo |
 | Repetição do script de ambiente | Passou, usando dependências e artefatos existentes |
-| Build Windows x64 com MSVC | **Não executado** nesta máquina Linux; preset e workflow preparados |
-| Tentativa Windows via MinGW | **Falhou por incompatibilidade explícita do JUCE 8**, que rejeita MinGW. Não foi gerado binário Windows |
+| Build Windows x64 com MSVC | **Passou** no GitHub Actions; VST3 e Standalone gerados |
+| CTest no Windows | **Passou**: DSP e processador |
+| Editor JUCE no Windows | **Passou**: construção e renderização para PNG |
+| Pacote Windows | **Passou**: assinaturas MZ/PE e arquitetura AMD64 dos dois binários |
+| Download publicado | **Passou**: ZIP baixado da Release, integridade ZIP, SHA-256 e commit interno conferidos |
+| Tentativa anterior via MinGW | Rejeitada pelo JUCE 8; substituída pelo build MSVC suportado no GitHub Actions |
 | Reprodução em DAW/hardware Windows | **Não executada** |
 | Equivalência sonora com Waves CLA Vocals | **Não estabelecida**; o DSP é próprio |
 
@@ -42,8 +48,16 @@ O script configura dependências de desenvolvimento sem root em `/workspace/deps
 
 O PNG não foi retocado, recortado nem recomprimido. Na interface em execução, os controles e medidores móveis são desenhados sobre o fundo; por isso uma captura do plugin pode apresentar posições/valores diferentes da imagem estática.
 
-## Próximo passo para Windows
+## Download para Windows
 
-Executar o preset `windows-x64` com Visual Studio 2022 ou o workflow de GitHub Actions incluído. Em seguida, instalar o bundle `.vst3` gerado e testar a abertura, áudio, automação, presets e restauração de sessão em uma DAW Windows 64 bits. Não publicar como release validada antes dessa verificação.
+[Preview v0.1.0-build.1](https://github.com/aulamix001/CLA-VOCALS/releases/tag/v0.1.0-build.1), com `Vocal-Suite-Windows-x64.zip` e `SHA256SUMS.txt`. O ZIP contém o bundle VST3 completo, o executável Standalone, instruções e identificação do commit.
+
+SHA-256 do ZIP publicado:
+
+```text
+cc0fd430ddd2d074d569acd78350318302dd26d9c1a8577c652bb0d2aba412eb
+```
+
+Instalar o bundle e testar abertura, áudio, automação, presets e restauração de sessão em uma DAW Windows 64 bits. A preview passou pelos checks automáticos; a validação auditiva em DAW/hardware reais continua pendente.
 
 Os campos `install_script` e `start_skill` foram salvos no rascunho das configurações do ambiente. Isso não publica o ambiente. Para reutilizar o snapshot em novas tarefas, revisar/salvar nas configurações do ambiente e publicar pelo produto.

@@ -2,6 +2,8 @@
 
 Plugin de efeitos com controles e modos baseados nas páginas do manual do CLA Vocals fornecidas nesta conversa. Formatos: **VST3 e aplicativo Standalone**, C++17, JUCE **8.0.6**, Windows **64 bits**. Também pode ser compilado em Linux para desenvolvimento e testes.
 
+**Download Windows x64:** [Vocal-Suite-Windows-x64.zip](https://github.com/aulamix001/CLA-VOCALS/releases/download/v0.1.0-build.1/Vocal-Suite-Windows-x64.zip). Extraia e copie a pasta inteira `Vocal Suite.vst3` para `C:\Program Files\Common Files\VST3\`. [Release e checksum](https://github.com/aulamix001/CLA-VOCALS/releases/tag/v0.1.0-build.1). O build MSVC, os testes e a renderização da interface passaram no [GitHub Actions](https://github.com/aulamix001/CLA-VOCALS/actions/runs/43753344140); a avaliação em DAW/hardware reais continua pendente.
+
 O DSP e os **62 presets são originais deste projeto**. O manual descreve a operação, mas não publica os algoritmos, curvas, tempos internos ou respostas impulsivas da Waves. Portanto, este projeto **não é uma reprodução sonora certificada ou bit a bit do CLA Vocals**, nem contém código/binários da Waves. A imagem de referência enviada/gerada é incorporada sem alteração; os elementos interativos são sobrepostos durante a execução. Para distribuição, confira as permissões da arte e marcas e a licença do JUCE (AGPLv3 ou comercial, conforme seu uso).
 
 ## Compilar no Windows 64 bits
@@ -21,7 +23,7 @@ Resultados:
 - `build/windows-x64/VocalSuite_artefacts/Release/VST3/Vocal Suite.vst3` — copie **a pasta VST3 inteira**, não apenas o binário interno, para `C:\Program Files\Common Files\VST3\` e faça a DAW procurar plugins novamente.
 - `build/windows-x64/VocalSuite_artefacts/Release/Standalone/Vocal Suite.exe` — selecione o dispositivo de áudio no aplicativo para ouvir a entrada.
 
-O workflow `.github/workflows/windows.yml` executa esses passos em Windows e disponibiliza os artefatos. Ele só é executado após envio do repositório ao GitHub ou acionamento pelo usuário; sua presença não significa que um build Windows já passou. Não há instalador nem assinatura digital nesta versão.
+O workflow `.github/workflows/windows.yml` compila em Windows, testa e empacota os binários. Pushes em `main` e tags `v*`, ou acionamento manual, publicam uma preview em Releases após os checks passarem; pull requests apenas executam os checks. O pacote usa runtime C++ estático. Não há instalador nem assinatura digital nesta versão.
 
 ## Operação
 
