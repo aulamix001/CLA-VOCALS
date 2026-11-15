@@ -1,0 +1,81 @@
+name: Windows x64 VST3
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: windows-2022
+    timeout-minutes: 40
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure JUCE and x64 targets
+        run: cmake --preset windows-x64
+      - name: Build
+        run: cmake --build --preset windows-release --parallel 2
+      - name: Test DSP and processor
+        run: ctest --preset windows-release
+      - name: Render editor smoke test
+        shell: pwsh
+        run: |
+          & "build/windows-x64/VocalProcessorTests_artefacts/Release/VocalProcessorTests.exe" "$env:RUNNER_TEMP/interface.png"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Package and verify Windows x64 binaries
+        shell: pwsh
+        env:
+          BUILD_COMMIT: ${{ github.sha }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $root = 'build/windows-x64/VocalSuite_artefacts/Release'
+          $bundle = "$root/VST3/Vocal Suite.vst3"
+          $binary = "$bundle/Contents/x86_64-win/Vocal Suite.vst3"
+          $standalone = "$root/Standalone/Vocal Suite.exe"
+          foreach ($path in @($binary, $standalone)) {
+            if (!(Test-Path -LiteralPath $path)) { throw "Missing binary: $path" }
+            $reader = [System.IO.BinaryReader]::new([System.IO.File]::OpenRead((Resolve-Path -LiteralPath $path)))
+            try {
+              if ($reader.ReadUInt16() -ne 0x5a4d) { throw "Invalid DOS signature: $path" }
+              $reader.BaseStream.Position = 0x3c
+              $peOffset = $reader.ReadInt32()
+              $reader.BaseStream.Position = $peOffset
+              if ($reader.ReadUInt32() -ne 0x00004550) { throw "Invalid PE signature: $path" }
+              if ($reader.ReadUInt16() -ne 0x8664) { throw "Not Windows AMD64: $path" }
+            } finally { $reader.Dispose() }
+          }
+          New-Item -ItemType Directory -Force 'dist/package' | Out-Null
+          Copy-Item -LiteralPath $bundle -Destination 'dist/package' -Recurse
+          Copy-Item -LiteralPath $standalone -Destination 'dist/package'
+          Copy-Item 'docs/INSTALL-WINDOWS.txt' 'dist/package/LEIA-ME.txt'
+          Copy-Item 'docs/RELEASE_NOTES.md' 'dist/package/RELEASE_NOTES.md'
+          @{ commit=$env:BUILD_COMMIT; platform='Windows AMD64'; juce='8.0.6'; configuration='Release'; created=(Get-Date -AsUTC -Format o) } |
+            ConvertTo-Json | Set-Content -Encoding utf8 'dist/package/build-info.json'
+          Compress-Archive -Path 'dist/package/*' -DestinationPath 'dist/Vocal-Suite-Windows-x64.zip' -Force
+          $hash = (Get-FileHash 'dist/Vocal-Suite-Windows-x64.zip' -Algorithm SHA256).Hash.ToLowerInvariant()
+          "$hash  Vocal-Suite-Windows-x64.zip" | Set-Content -Encoding ascii 'dist/SHA256SUMS.txt'
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Vocal-Suite-Windows-x64
+          path: |
+            dist/Vocal-Suite-Windows-x64.zip
+            dist/SHA256SUMS.txt
+          if-no-files-found: error
+      - name: Publish downloadable preview release
+        if: github.event_name != 'pull_request'
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          BUILD_COMMIT: ${{ github.sha }}
+          BUILD_REF: ${{ github.ref }}
+          BUILD_REF_NAME: ${{ github.ref_name }}
+          BUILD_RUN: ${{ github.run_number }}
+        run: |
+          $tag = if ($env:BUILD_REF.StartsWith('refs/tags/')) { $env:BUILD_REF_NAME } else { "v0.1.0-build.$env:BUILD_RUN" }
+          gh release create $tag 'dist/Vocal-Suite-Windows-x64.zip' 'dist/SHA256SUMS.txt' --target $env:BUILD_COMMIT --prerelease --title "Vocal Suite Windows x64 - $tag" --notes-file 'docs/RELEASE_NOTES.md'
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }

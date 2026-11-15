@@ -1,0 +1,21 @@
+VOCAL SUITE - WINDOWS 64 BITS
+
+1. Extraia este ZIP.
+2. Copie a PASTA INTEIRA "Vocal Suite.vst3" para:
+   C:\Program Files\Common Files\VST3\
+3. Abra sua DAW Windows 64 bits e procure novos plugins VST3.
+4. Insira "Vocal Suite" em uma pista de audio.
+5. Clique no campo de presets na barra superior para selecionar um dos 62 presets.
+
+O arquivo "Vocal Suite.exe" e a versao Standalone opcional.
+Selecione o dispositivo de audio e seus canais antes de usa-la.
+
+Os parametros do preset sao carregados automaticamente. Isso nao identifica
+automaticamente o instrumento no audio. Ajuste entrada e saida para sua gravacao.
+
+Versao de avaliacao, sem assinatura digital. DSP autoral: nao e uma emulacao
+sonora certificada do produto comercial Waves CLA Vocals. Os testes automaticos
+nao substituem validacao auditiva em sua DAW e hardware.
+
+O arquivo build-info.json identifica o commit usado na compilacao.
+SHA256SUMS.txt, publicado junto do ZIP, permite conferir sua integridade.
